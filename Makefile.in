@@ -1,0 +1,33 @@
+LIBS	:=	jack lua-5.2 sndfile samplerate
+CFLAGS	:=	$(shell pkg-config --cflags $(LIBS)) -MMD -O3 \
+				-D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE \
+				-std=c11 -DPREFIX=\"$(PREFIX)\" $(CFLAGS)
+LDFLAGS	:=	$(shell pkg-config --libs $(LIBS)) -flto -lm
+SOURCES	:=	$(wildcard *.c)
+OBJECTS	:=	$(SOURCES:%.c=%.o)
+DEPENDS	:=	$(SOURCES:%.c=%.d)
+
+all: vnas
+
+vnas: $(OBJECTS)
+	@ printf "CCLD\t%s\n" $(@)
+	@ $(CC) -o $(@) $(^) $(LDFLAGS)
+
+-include $(DEPENDS)
+
+.c.o:
+	@ printf "CC\t%s\n" $(@)
+	@ $(CC) $(CFLAGS) -o $(@) -c $(<)
+
+clean:
+	rm -f vnas *.o *.d
+
+install:
+	mkdir -p $(PREFIX)/bin $(PREFIX)/share/vnas
+	cp vnas $(PREFIX)/bin/vnas
+	cp -r lib $(PREFIX)/share/vnas/lib
+
+debug: CFLAGS += -O0 -g -Wno-cpp
+debug: all
+
+.PHONY: all clean install debug

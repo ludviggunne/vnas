@@ -1,0 +1,7 @@
+*.o
+*.d
+*.so
+*.dot
+*.png
+vnas
+Makefile

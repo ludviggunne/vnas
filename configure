@@ -1,0 +1,19 @@
+#! /usr/bin/env sh
+
+prefix=/usr/local
+
+while [ -n "$1" ]; do
+	case "$1" in
+	--prefix=*)	prefix="${1##--prefix=}" ;;
+	*)		>&2 echo "error: unknown option $1" && exit ;;
+	esac
+	shift
+done
+
+set_var() {
+	echo -e "$1\t:=\t$2" >>Makefile
+}
+
+rm -f Makefile
+set_var PREFIX "$prefix"
+cat Makefile.in >>Makefile

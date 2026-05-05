@@ -1,0 +1,6 @@
+require 'lib.extra.plugins'
+require 'lib.extra.ports'
+require 'lib.extra.filters'
+require 'lib.extra.midi'
+require 'lib.extra.log'
+require 'lib.extra.node'
