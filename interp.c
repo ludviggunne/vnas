@@ -50,6 +50,7 @@ static int api_create_interp(lua_State *state)
 
   struct interp *interp = lua_newuserdata(state, sizeof(*interp));
   luaL_setmetatable(state, s_interp_mt);
+  api_gc_protect(state, -1);
 
   interp->src = init;
   interp->dst = init;

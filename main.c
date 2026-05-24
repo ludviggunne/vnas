@@ -72,7 +72,7 @@ int main(int argc, char **argv)
   const char *binds_spec = NULL;
 
   int c;
-  while ((c = getopt(argc, argv, "b:g:vc:x:aAmM")) != -1) {
+  while ((c = getopt(argc, argv, "b:g:vc:x:aAmMh")) != -1) {
     switch (c) {
     case 'b':
       binds_spec = optarg;
@@ -101,6 +101,9 @@ int main(int argc, char **argv)
     case 'M':
       script_arg = "for _, e in ipairs(Port.Midi.destinations()) do print(e) end exit()";
       break;
+    case 'h':
+      usage(stdout);
+      exit(EXIT_SUCCESS);
     default:
       usage(stderr);
       exit(EXIT_FAILURE);
