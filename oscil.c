@@ -79,11 +79,27 @@ static int api_cntl_amp(lua_State *state)
   return 0;
 }
 
+static int api_set_freq(lua_State *state)
+{
+  struct oscil *oscil = luaL_checkudata(state, 1, s_oscil_mt);
+  oscil->freq = luaL_checknumber(state, 2);
+  return 0;
+}
+
+static int api_set_amp(lua_State *state)
+{
+  struct oscil *oscil = luaL_checkudata(state, 1, s_oscil_mt);
+  oscil->amp = luaL_checknumber(state, 2);
+  return 0;
+}
+
 void api_define_oscil(lua_State *state)
 {
   const luaL_Reg methods[] = {
     { "cntl_freq", api_cntl_freq, },
     { "cntl_amp",  api_cntl_amp, },
+    { "freq",      api_set_freq, },
+    { "amp",       api_set_amp, },
     { NULL,        NULL, },
   };
 
