@@ -22,11 +22,11 @@ function M.init(bpm, callback)
   return setmetatable(self, M)
 end
 
-function M:activate()
+function M:start()
   self.active = true
 end
 
-function M:deactivate()
+function M:stop()
   self.active = false
 end
 

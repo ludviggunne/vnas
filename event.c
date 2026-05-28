@@ -42,9 +42,10 @@ struct event {
   int           main_thread_arg;
 };
 
+/* user facing handle for cancelation of events */
 struct api_event_handle {
-  event_id_t id;
-  int        seq;
+  event_id_t    id;
+  unsigned long seq;
 };
 
 
