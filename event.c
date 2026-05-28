@@ -318,6 +318,9 @@ void run_event_callback(event_id_t id)
     loginfo("%s\n", err);
   }
 
+  /* Event pool may have been reallocated during callback */
+  e = &s_pool[id];
+
   switch (e->type) {
   case EVENT_USER:
     luaL_unref(lua_state, e->user_arg, LUA_REGISTRYINDEX);
