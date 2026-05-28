@@ -32,7 +32,7 @@ static void process_fn(void *data, unsigned long n, float **in, int num_in, floa
         interp->t0 = 0;
         interp->src = interp->dst;
 
-        logdebug("interp\tend\t%.2f", interp->src);
+        logtrace("interp\tend\t%.2f", interp->src);
       } else {
         interp->t++;
       }
@@ -79,7 +79,7 @@ static int api_target(lua_State *state)
   interp->src = interp->curr;
   interp->t = 0;
 
-  logdebug("interp\tstart\t%.2f\t%.2f\t%.2f",
+  logtrace("interp\tstart\t%.2f\t%.2f\t%.2f",
        interp->src, interp->dst, interp->t0f);
 
   return 0;
