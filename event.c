@@ -14,6 +14,8 @@ extern jack_client_t *client;
 extern lua_State *lua_state;
 extern int verbose;
 
+static const char *const s_event_handle_mt = "event handle";
+
 enum {
   EVENT_MIDI,
   EVENT_USER,
@@ -26,6 +28,7 @@ struct event {
   unsigned long t;
   unsigned long seq;
   event_id_t    next_free;
+  int           canceled;
 
   /* midi event data */
   int           midi_status;
@@ -37,6 +40,11 @@ struct event {
 
   /* main thread event data */
   int           main_thread_arg;
+};
+
+struct api_event_handle {
+  event_id_t id;
+  int        seq;
 };
 
 
@@ -136,6 +144,7 @@ static event_id_t alloc_event(void)
 
 done:
   s_pool[id].seq = s_seq_counter++;
+  s_pool[id].canceled = 0;
   return id;
 }
 
@@ -325,16 +334,23 @@ void run_event_callback(event_id_t id)
 
 event_id_t next_event(unsigned long tmax)
 {
-  if (s_queue_len == 0)
-    return NO_EVENT;
+  for (;;) {
+    if (s_queue_len == 0)
+      return NO_EVENT;
 
-  if (s_pool[s_queue[0]].t >= tmax)
-    return NO_EVENT;
+    if (s_pool[s_queue[0]].t >= tmax)
+      return NO_EVENT;
 
-  if (verbose >= 2)
-    dump_event(&s_pool[s_queue[0]]);
+    if (verbose >= 2)
+      dump_event(&s_pool[s_queue[0]]);
 
-  return s_queue[0];
+    if (s_pool[s_queue[0]].canceled) {
+      pop_event();
+      continue;
+    }
+
+    return s_queue[0];
+  }
 }
 
 unsigned long event_timestamp(int id)
@@ -369,6 +385,19 @@ void convert_user_event_timestamps(unsigned long sr)
   }
 }
 
+static int api_cancel(lua_State *state)
+{
+  if (lua_isnil(state, 1))
+    return 0;
+
+  struct api_event_handle *h = luaL_checkudata(state, 1, s_event_handle_mt);
+
+  if (s_pool[h->id].seq == h->seq)
+    s_pool[h->id].canceled = 1;
+
+  return 0;
+}
+
 static int api_schedule(lua_State *state)
 {
   float real_t = luaL_checknumber(state, 1);
@@ -399,13 +428,20 @@ static int api_schedule(lua_State *state)
     push_event(id);
   }
 
-  return 0;
+  struct api_event_handle *h = lua_newuserdata(state, sizeof(*h));
+  luaL_setmetatable(state, s_event_handle_mt);
+
+  h->id = id;
+  h->seq = e->seq;
+
+  return 1;
 }
 
 void api_define_user_events(lua_State *state)
 {
   const luaL_Reg funcs[] = {
     { "schedule",     api_schedule, },
+    { "cancel",       api_cancel, },
     { NULL,           NULL, },
   };
 
@@ -413,4 +449,6 @@ void api_define_user_events(lua_State *state)
     lua_pushcfunction(state, reg->func);
     lua_setglobal(state, reg->name);
   }
+
+  luaL_newmetatable(state, s_event_handle_mt);
 }
