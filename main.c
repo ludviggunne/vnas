@@ -127,7 +127,7 @@ int main(int argc, char **argv)
   node_pool_init();
 
   if (!script_arg && optind >= argc) {
-    fprintf(stderr, "%s: missing file argument\n", program);
+    fprintf(stderr, "%s: missing FILE argument\n", program);
     usage(stderr);
     exit(EXIT_FAILURE);
   }

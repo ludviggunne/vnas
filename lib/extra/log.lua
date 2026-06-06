@@ -18,7 +18,3 @@ end
 function log.fmt.info(...) fmt(0, ...) end
 function log.fmt.debug(...) fmt(1, ...) end
 function log.fmt.trace(...) fmt(2, ...) end
-
-print = function(...)
-  error('print(...) is disabled. Use log.info(...) instead.')
-end

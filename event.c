@@ -82,14 +82,14 @@ static void dump_event(struct event *e)
 {
   switch (e->type) {
   case EVENT_USER:
-    logcrazy("user event(%ld)", e->seq);
+    logtrace("user event(%ld)", e->seq);
     return;
   case EVENT_MIDI:
-    logcrazy("midi event(%ld)\t%d\t%d\t%d",
+    logtrace("midi event(%ld)\t%d\t%d\t%d",
             e->seq, e->midi_status, e->midi_data1, e->midi_data2);
     return;
   case EVENT_MAIN_THREAD:
-    logcrazy("main thread event(%ld)", e->seq);
+    logtrace("main thread event(%ld)", e->seq);
     return;
   }
 }
@@ -239,11 +239,11 @@ void push_midi_event(unsigned long t, int status, int data1, int data2, int cb)
 void push_main_thread_event(int cb, main_thread_event_push_arg_t push_arg, void *data, size_t size)
 {
   unsigned long t = jack_frame_time(client);
-  jack_ringbuffer_write(s_main_thread_events, (char*) &t, sizeof t);
-  jack_ringbuffer_write(s_main_thread_events, (char*) &cb, sizeof cb);
-  jack_ringbuffer_write(s_main_thread_events, (char*) &push_arg, sizeof push_arg);
-  jack_ringbuffer_write(s_main_thread_events, (char*) &size, sizeof size);
-  jack_ringbuffer_write(s_main_thread_events, (char*) data, size);
+  jack_ringbuffer_write(s_main_thread_events, (const char*) &t, sizeof t);
+  jack_ringbuffer_write(s_main_thread_events, (const char*) &cb, sizeof cb);
+  jack_ringbuffer_write(s_main_thread_events, (const char*) &push_arg, sizeof push_arg);
+  jack_ringbuffer_write(s_main_thread_events, (const char*) &size, sizeof size);
+  jack_ringbuffer_write(s_main_thread_events, (const char*) data, size);
 }
 
 void process_main_thread_events(unsigned long n)
@@ -342,18 +342,21 @@ event_id_t next_event(unsigned long tmax)
     if (s_queue_len == 0)
       return NO_EVENT;
 
-    if (s_pool[s_queue[0]].t >= tmax)
+    event_id_t id = s_queue[0];
+    struct event *e = &s_pool[id];
+
+    if (e->t >= tmax)
       return NO_EVENT;
 
     if (verbose >= 2)
-      dump_event(&s_pool[s_queue[0]]);
+      dump_event(e);
 
-    if (s_pool[s_queue[0]].canceled) {
+    if (e->canceled) {
       pop_event();
       continue;
     }
 
-    return s_queue[0];
+    return id;
   }
 }
 
