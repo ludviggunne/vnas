@@ -29,3 +29,15 @@ end
 internal_type('midi output port').select = function(port, prompt)
   port:connect(select_from(prompt, Port.Midi.destinations()))
 end
+
+internal_type('midi output port').note_on = function(port, ...)
+  port:send(0x90, ...)
+end
+
+internal_type('midi output port').note_off = function(port, ...)
+  port:send(0x80, ...)
+end
+
+internal_type('midi output port').all_off = function(port)
+  port:send(0xb0, 0x7b, 0x0)
+end

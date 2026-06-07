@@ -6,6 +6,7 @@
 #include <jack/jack.h>
 #include <jack/midiport.h>
 #include <jack/statistics.h>
+#include <jack/ringbuffer.h>
 
 #include "log.h"
 #include "port.h"
@@ -24,13 +25,14 @@ enum port_type {
 };
 
 struct port {
-  node_id_t       node;
-  enum port_type  type;
-  jack_port_t    *handle;
-  float          *jbuf;
-  int             cb;
-  int             arg;
-  struct port    *next;
+  node_id_t          node;
+  enum port_type     type;
+  jack_port_t       *handle;
+  float             *jbuf;
+  int                cb;
+  int                arg;
+  jack_ringbuffer_t *rbuf;
+  struct port       *next;
 };
 
 static unsigned long  s_sample_rate = 0;
@@ -112,6 +114,20 @@ static void process_range(jack_nframes_t from, jack_nframes_t to)
       port->jbuf += n;
 }
 
+static void process_outgoing_midi_messages(jack_nframes_t t, jack_nframes_t n)
+{
+  unsigned char buf[3];
+
+  for (struct port *port = s_port_lists[PORT_MIDI_OUT]; port; port = port->next) {
+    while (jack_ringbuffer_read(port->rbuf, (char*) buf, sizeof buf) == sizeof buf) {
+      void *ptr = jack_port_get_buffer(port->handle, n);
+      unsigned char *event = jack_midi_event_reserve(ptr, t, 3);
+      logdebug("midi out\t%d\t\%d\t\%d", buf[0], buf[1], buf[2]);
+      memcpy(event, buf, sizeof buf);
+    }
+  }
+}
+
 static int process_callback(jack_nframes_t n, void *args)
 {
   resize_buffers(n);
@@ -123,6 +139,11 @@ static int process_callback(jack_nframes_t n, void *args)
 
   for (struct port *port = s_port_lists[PORT_AUDIO_OUT]; port; port = port->next)
     port->jbuf = jack_port_get_buffer(port->handle, n);
+
+  for (struct port *port = s_port_lists[PORT_MIDI_OUT]; port; port = port->next) {
+    void *buf = jack_port_get_buffer(port->handle, n);
+    jack_midi_clear_buffer(buf);
+  }
 
   for (struct port *port = s_port_lists[PORT_MIDI_IN]; port; port = port->next) {
     if (port->cb == LUA_NOREF)
@@ -147,11 +168,13 @@ static int process_callback(jack_nframes_t n, void *args)
 
     t1 = t0 + t;
     process_range(t0, t1);
-    t0 = t1;
 
     offset_events(t);
     run_event_callback(event);
+    process_outgoing_midi_messages(t1, n);
     pop_event();
+
+    t0 = t1;
   }
 
   process_range(t0, n);
@@ -212,6 +235,7 @@ static int api_create_port(lua_State *state)
   port->cb = LUA_NOREF;
   port->arg = LUA_NOREF;
   port->next = *list;
+  port->rbuf = NULL;
 
   *list = port;
 
@@ -244,7 +268,7 @@ static int api_create_port(lua_State *state)
     break;
 
   case PORT_MIDI_OUT:
-    assert(0 && "midi output ports are not implemented");
+    port->rbuf = jack_ringbuffer_create(4096);
     break;
   }
 
@@ -309,6 +333,30 @@ static int api_set_callback(lua_State *state)
   luaL_checktype(state, 2, LUA_TFUNCTION);
   lua_pushvalue(state, 2);
   port->cb = luaL_ref(state, LUA_REGISTRYINDEX);
+  return 0;
+}
+
+static void check_midi_value(lua_State *state, int v)
+{
+  if (v < 0 || v > 255)
+    luaL_error(state, "invalid MIDI byte: %d", v);
+}
+
+static int api_send(lua_State *state)
+{
+  struct port *port = luaL_checkudata(state, 1, s_port_mts[PORT_MIDI_OUT]);
+
+  int status = luaL_checkinteger(state, 2);
+  int data1 = luaL_checkinteger(state, 3);
+  int data2 = luaL_checkinteger(state, 4);
+
+  check_midi_value(state, status);
+  check_midi_value(state, data1);
+  check_midi_value(state, data2);
+
+  unsigned char buf[3] = { status, data1, data2 };
+  jack_ringbuffer_write(port->rbuf, (const char*) buf, sizeof buf);
+
   return 0;
 }
 
@@ -394,6 +442,8 @@ void api_define_ports(lua_State *state)
 
   luaL_newmetatable(state, s_port_mts[PORT_MIDI_OUT]);
   lua_newtable(state);
+  lua_pushcfunction(state, api_send);
+  lua_setfield(state, -2, "send");
   lua_pushinteger(state, PORT_MIDI_OUT);
   lua_pushcclosure(state, api_connect_port, 1);
   lua_setfield(state, -2, "connect");

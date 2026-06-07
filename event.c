@@ -316,7 +316,7 @@ void run_event_callback(event_id_t id)
 
   if (lua_pcall(lua_state, 1, 0, 0) != LUA_OK) {
     const char *err = luaL_checkstring(lua_state, -1);
-    loginfo("%s\n", err);
+    fprintf(stderr, "%s\n", err);
   }
 
   /* Event pool may have been reallocated during callback */
