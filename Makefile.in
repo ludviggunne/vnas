@@ -1,4 +1,4 @@
-LIBS	:=	jack lua-5.2 sndfile samplerate
+LIBS	:=	jack lua-5.3 sndfile samplerate
 CFLAGS	:=	$(shell pkg-config --cflags $(LIBS)) -MMD -O3 \
 				-D_POSIX_C_SOURCE=200809L -D_GNU_SOURCE \
 				-std=c11 -DPREFIX=\"$(PREFIX)\" $(CFLAGS)

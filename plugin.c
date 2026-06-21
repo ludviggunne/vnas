@@ -311,7 +311,7 @@ static int api_load_plugin(lua_State *state)
 static int api_plugin_cntl(lua_State *state)
 {
   struct plugin *plugin = luaL_checkudata(state, 1, s_plugin_mt);
-  int port = luaL_checkint(state, 2);
+  int port = luaL_checkinteger(state, 2);
   float value = luaL_checknumber(state, 3);
 
   plugin->cntl_ports[port] = value;
