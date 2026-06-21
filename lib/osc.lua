@@ -1,6 +1,10 @@
+local function fail()
+    error 'failed to parse osc message'
+end
+
 local function read_byte(state)
   if #state.str == 0 then
-    return nil
+    fail()
   end
 
   local c = state.str:sub(1,1)
@@ -16,10 +20,6 @@ local function read_string(state)
   while true do
     local c = read_byte(state)
 
-    if c == nil then
-      return nil
-    end
-
     if c == '\0' then
       break
     end
@@ -28,12 +28,24 @@ local function read_string(state)
   end
 
   while state.i % 4 ~= 0 do
-    if read_byte(state) == nil then
-      return nil
+    if read_byte(state) ~= '\0' then
+      fail()
     end
   end
 
   return str
+end
+
+local function read_integer(state)
+  if #state.str < 4 then
+    fail()
+  end
+
+  local bytes = state.str:sub(1,4)
+  state.str = state.str:sub(5)
+  state.i = state.i + 4
+
+  return string.unpack('>i4', bytes)
 end
 
 function osc_decode(str)
@@ -43,14 +55,7 @@ function osc_decode(str)
   }
 
   local addr = read_string(state)
-  if addr == nil then
-    return nil
-  end
-
   local ttag = read_string(state)
-  if ttag == nil then
-    return nil
-  end
 
   local args = {}
 
@@ -59,12 +64,12 @@ function osc_decode(str)
 
     if c == 's' then
       local s = read_string(state)
-      if s == nil then
-        return nil
-      end
       table.insert(args,s)
+    elseif c == 'i' then
+      local i = read_integer(state)
+      table.insert(args,i)
     else
-      return nil
+      fail()
     end
   end
 
