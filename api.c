@@ -65,8 +65,9 @@ void api_init(lua_State *state)
   api_define_user_events(state);
   api_define_midi_msg(state);
   api_define_key_callback(state);
-  api_define_osc_socket(state);
   api_define_log(state);
+  api_define_serial_stream(state);
+  api_define_udp_socket(state);
 }
 
 int api_did_exit(void)

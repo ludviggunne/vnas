@@ -1,7 +1,7 @@
 #ifndef NODE_H
 #define NODE_H
 
-#define NODE_MAX_CONNECTIONS 16
+#define NODE_MAX_CONNECTIONS 1024
 
 typedef int node_id_t;
 typedef int buffer_id_t;

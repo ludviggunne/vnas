@@ -8,14 +8,21 @@ function M.init(attack, decay, sustain, release)
     _decay = decay,
     _sustain = sustain,
     _release = release,
+    _active = false,
   }, M)
 end
 
-function M:attack()
+function M:cancel()
   cancel(self.env_id)
   cancel(self.release_id)
+  cancel(self.deact_ud)
+end
+
+function M:attack()
+  self:cancel()
   self.interp:target(1, self._attack)
   self.env_id = schedule(self._attack, self.decay, self)
+  self._active = true
 end
 
 function M:decay()
@@ -24,16 +31,23 @@ function M:decay()
 end
 
 function M:release()
-  cancel(self.env_id)
-  cancel(self.release_id)
+  self:cancel()
   self.interp:target(0, self._release)
+  self.deact_id = schedule(self._release, self.deactivate, self)
 end
 
 function M:hold(t)
-  cancel(self.env_id)
-  cancel(self.release_id)
+  self:cancel()
   self:attack()
   self.release_id = schedule(t, self.release, self)
+end
+
+function M:deactivate()
+  self._active = false
+end
+
+function M:active()
+  return self._active
 end
 
 function M:out()

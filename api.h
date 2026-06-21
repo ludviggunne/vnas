@@ -29,7 +29,11 @@ void api_define_filter(lua_State *state);
 void api_define_user_events(lua_State *state);
 void api_define_midi_msg(lua_State *state);
 void api_define_key_callback(lua_State *state);
+void api_define_osc_msg(lua_State *state);
 void api_define_osc_socket(lua_State *state);
+void api_define_osc_serial(lua_State *state);
 void api_define_log(lua_State *state);
+void api_define_serial_stream(lua_State *state);
+void api_define_udp_socket(lua_State *state);
 
 #endif
