@@ -62,12 +62,39 @@ static void push_arg(lua_State *state, void *data, size_t size)
   lua_pushlstring(state, data, size);
 }
 
-static void io_handler(int fd, void *data)
+static void io_handler_cstr(int fd, void *data)
 {
   struct serial_stream *s = data;
 
-  if (!s->synced && sync_stream(s) < 0)
+  if (!s->synced) {
+    sync_stream(s);
     return;
+  }
+
+  clear_buf(s);
+
+  int c;
+
+  while ((c = read_byte(fd)) != 0) {
+    if (c < 0) {
+      s->synced = 0;
+      return;
+    }
+
+    put_byte(s,c);
+  }
+
+  push_main_thread_event(s->cb, push_arg, s->buf, s->size);
+}
+
+static void io_handler_cobs(int fd, void *data)
+{
+  struct serial_stream *s = data;
+
+  if (!s->synced) {
+    sync_stream(s);
+    return;
+  }
 
   clear_buf(s);
 
@@ -104,9 +131,19 @@ static int api_create_serial_stream(lua_State *state)
 {
   const char *path = luaL_checkstring(state, 1);
   int baud = luaL_checkinteger(state, 2);
+  const char *encoding = luaL_checkstring(state, 3);
 
-  luaL_checktype(state, 3, LUA_TFUNCTION);
-  lua_pushvalue(state, 3);
+  io_handler_t io_handler;
+  if (strcmp(encoding,"cobs") == 0) {
+    io_handler = io_handler_cobs;
+  } else if (strcmp(encoding,"cstr") == 0) {
+    io_handler = io_handler_cstr;
+  } else {
+    luaL_error(state, "invalid encoding: %s", encoding);
+  }
+
+  luaL_checktype(state, 4, LUA_TFUNCTION);
+  lua_pushvalue(state, 4);
   int cb = luaL_ref(state, LUA_REGISTRYINDEX);
 
   struct serial_stream *s = lua_newuserdata(state, sizeof *s);
