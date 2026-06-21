@@ -63,17 +63,6 @@ static void push_arg(lua_State *state, void *data, size_t size)
   lua_pushlstring(state, data, size);
 }
 
-void UnStuffData(const unsigned char *ptr, unsigned long length, unsigned char *dst)
-{
-  const unsigned char *end = ptr + length;
-  while (ptr < end)
-  {
-    int i, code = *ptr++;
-    for (i=1; i<code; i++) *dst++ = *ptr++;
-    if (code < 0xFF) *dst++ = 0;
-  }
-}
-
 static void io_handler(int fd, void *data)
 {
   struct serial_stream *s = data;
