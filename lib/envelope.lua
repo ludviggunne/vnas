@@ -1,9 +1,9 @@
 local M = {}
 M.__index = M
 
-function M.init(attack, decay, sustain, release)
+function envelope(attack, decay, sustain, release)
   return setmetatable({
-    interp = Interp.init(0),
+    interp = interp(0),
     _attack = attack,
     _decay = decay,
     _sustain = sustain,
@@ -53,5 +53,3 @@ end
 function M:out()
   return self.interp:out()
 end
-
-return M

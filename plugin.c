@@ -342,17 +342,15 @@ void api_define_plugin(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "load",     api_load_plugin, },
-    { "bindings", api_genbinds, },
-    { NULL,       NULL, },
+    { "plugin",     api_load_plugin, },
+    { "bindings",   api_genbinds, },
+    { NULL,         NULL, },
   };
 
-  lua_newtable(state);
   for (const luaL_Reg *reg = funcs; reg->name; reg++) {
     lua_pushcfunction(state, reg->func);
-    lua_setfield(state, -2, reg->name);
+    lua_setglobal(state, reg->name);
   }
-  lua_setglobal(state, "Plugin");
 
   luaL_newmetatable(state, s_plugin_mt);
   lua_newtable(state);

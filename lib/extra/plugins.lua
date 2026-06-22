@@ -1,3 +1,3 @@
-function Plugin.load_bindings(spec)
-  return (load(Plugin.bindings(spec)))()
+function load_bindings(spec)
+  return (load(bindings(spec)))()
 end

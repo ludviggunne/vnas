@@ -1,6 +1,6 @@
-local EventQueue = require 'lib.event_queue'
+require 'lib.event_queue'
 
-local queue = EventQueue.init(log.info)
+local queue = event_queue(log.info)
 
 queue:append_list({
   { 1,     '1'     },

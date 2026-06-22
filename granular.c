@@ -327,16 +327,14 @@ void api_define_granular(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "init", api_create_synth, },
+    { "granular", api_create_synth, },
     { NULL,    NULL, },
   };
 
-  lua_newtable(state);
   for (const luaL_Reg *reg = funcs; reg->name; reg++) {
     lua_pushcfunction(state, reg->func);
-    lua_setfield(state, -2, reg->name);
+    lua_setglobal(state, reg->name);
   }
-  lua_setglobal(state, "Granular");
 
   luaL_newmetatable(state, s_synth_mt);
   lua_newtable(state);

@@ -1,15 +1,14 @@
+function init_port(path, name)
+  local samp = sample(path)
+  samp:downmix()
 
-function init_port(path, name, dest)
-  local sample = Sample.load(path)
-  sample:downmix()
+  local pb = playback(samp)
+  pb:play()
+  pb:loop()
 
-  local playback = Playback.init(sample)
-  playback:play()
-  playback:loop()
-
-  local port = Port.Audio.output(name, playback:out(0))
-  port:connect(dest)
+  local port = audio_out(name, pb:out(0))
+  port:select(name)
 end
 
-init_port('examples/playback_L.wav', 'outputL', 'Built-in Audio Analog Stereo:playback_FL')
-init_port('examples/playback_R.wav', 'outputR', 'Built-in Audio Analog Stereo:playback_FR')
+init_port('examples/playback_L.wav', 'outputL')
+init_port('examples/playback_R.wav', 'outputR')

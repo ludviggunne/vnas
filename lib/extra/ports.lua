@@ -15,19 +15,19 @@ function select_from(prompt, list)
 end
 
 internal_type('audio input port').select = function(port, prompt)
-  port:connect(select_from(prompt, Port.Audio.sources()))
+  port:connect(select_from(prompt, audio_sources()))
 end
 
 internal_type('audio output port').select = function(port, prompt)
-  port:connect(select_from(prompt, Port.Audio.destinations()))
+  port:connect(select_from(prompt, audio_sinks()))
 end
 
 internal_type('midi input port').select = function(port, prompt)
-  port:connect(select_from(prompt, Port.Midi.sources()))
+  port:connect(select_from(prompt, midi_sources()))
 end
 
 internal_type('midi output port').select = function(port, prompt)
-  port:connect(select_from(prompt, Port.Midi.destinations()))
+  port:connect(select_from(prompt, midi_sinks()))
 end
 
 internal_type('midi output port').note_on = function(port, ...)

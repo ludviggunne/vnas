@@ -93,16 +93,14 @@ void api_define_interp(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "init", api_create_interp, },
+    { "interp", api_create_interp, },
     { NULL,    NULL, },
   };
 
-  lua_newtable(state);
   for (const luaL_Reg *reg = funcs; reg->name; reg++) {
     lua_pushcfunction(state, reg->func);
-    lua_setfield(state, -2, reg->name);
+    lua_setglobal(state, reg->name);
   }
-  lua_setglobal(state, "Interp");
 
   luaL_newmetatable(state, s_interp_mt);
   lua_newtable(state);

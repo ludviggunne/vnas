@@ -362,56 +362,46 @@ static int api_send(lua_State *state)
 
 static void api_define_audio(lua_State *state)
 {
-  lua_newtable(state);
-
   lua_pushinteger(state, PORT_AUDIO_IN);
   lua_pushcclosure(state, api_create_port, 1);
-  lua_setfield(state, -2, "input");
+  lua_setglobal(state, "audio_in");
 
   lua_pushinteger(state, PORT_AUDIO_OUT);
   lua_pushcclosure(state, api_list_peers, 1);
-  lua_setfield(state, -2, "sources");
+  lua_setglobal(state, "audio_sources");
 
   lua_pushinteger(state, PORT_AUDIO_OUT);
   lua_pushcclosure(state, api_create_port, 1);
-  lua_setfield(state, -2, "output");
+  lua_setglobal(state, "audio_out");
 
   lua_pushinteger(state, PORT_AUDIO_IN);
   lua_pushcclosure(state, api_list_peers, 1);
-  lua_setfield(state, -2, "destinations");
-
-  lua_setfield(state, -2, "Audio");
+  lua_setglobal(state, "audio_sinks");
 }
 
 static void api_define_midi(lua_State *state)
 {
-  lua_newtable(state);
-
   lua_pushinteger(state, PORT_MIDI_IN);
   lua_pushcclosure(state, api_create_port, 1);
-  lua_setfield(state, -2, "input");
+  lua_setglobal(state, "midi_in");
 
   lua_pushinteger(state, PORT_MIDI_OUT);
   lua_pushcclosure(state, api_list_peers, 1);
-  lua_setfield(state, -2, "sources");
+  lua_setglobal(state, "midi_sources");
 
   lua_pushinteger(state, PORT_MIDI_OUT);
   lua_pushcclosure(state, api_create_port, 1);
-  lua_setfield(state, -2, "output");
+  lua_setglobal(state, "midi_out");
 
   lua_pushinteger(state, PORT_MIDI_IN);
   lua_pushcclosure(state, api_list_peers, 1);
-  lua_setfield(state, -2, "destinations");
-
-  lua_setfield(state, -2, "Midi");
+  lua_setglobal(state, "midi_sinks");
 }
 
 void api_define_ports(lua_State *state)
 {
-  lua_newtable(state);
   api_define_audio(state);
   api_define_midi(state);
-  lua_setglobal(state, "Port");
 
   luaL_newmetatable(state, s_port_mts[PORT_AUDIO_IN]);
   lua_newtable(state);

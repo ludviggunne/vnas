@@ -3,17 +3,17 @@
 local M = {}
 M.__index = M
 
-function M.input(idx, offset)
+function input(idx, offset)
   return setmetatable({{ 'input', idx, offset or nil }}, M)
 end
 
-function M.const(value)
+function const(value)
   return setmetatable({{ 'const', value, nil }}, M)
 end
 
 local function toM(value)
   if type(value) == 'number' then
-    value = M.const(value)
+    value = const(value)
   end
   return value
 end
@@ -47,5 +47,3 @@ end
 function M.__div(lhs, rhs)
   return binop('div', lhs, rhs)
 end
-
-return M

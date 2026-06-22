@@ -1,7 +1,7 @@
 local M = {}
 M.__index = M
 
-function M.init(bpm, callback)
+function clock(bpm, callback)
   local self = {
     user_cb = callback,
     interval = 60.0 / bpm,
@@ -33,5 +33,3 @@ end
 function M:reset()
   self.counter = 0
 end
-
-return M

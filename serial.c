@@ -176,16 +176,18 @@ void api_define_serial_stream(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "init", api_create_serial_stream, },
+    // { "init", api_create_serial_stream, },
+    { "serial", api_create_serial_stream, },
     { NULL,   NULL, },
   };
 
-  lua_newtable(state);
+  // lua_newtable(state);
   for (const luaL_Reg *reg = funcs; reg->name; reg++) {
     lua_pushcfunction(state, reg->func);
-    lua_setfield(state, -2, reg->name);
+    // lua_setfield(state, -2, reg->name);
+    lua_setglobal(state, reg->name);
   }
-  lua_setglobal(state, "Serial");
+  // lua_setglobal(state, "Serial");
 
   luaL_newmetatable(state, s_serial_stream_mt);
   lua_newtable(state);

@@ -1,9 +1,9 @@
 require 'lib.extra'
 
-local sample = Sample.load 'examples/playback_L.wav'
-local synth = Granular.init(sample)
-local mix = Filter.mix({synth:out(0), synth:out(1)})
-local port = Port.Audio.output('out', mix:out(0))
+local samp = sample 'examples/playback_L.wav'
+local synth = granular(samp)
+local m = mix({synth:out(0), synth:out(1)})
+local p = audio_out('out', m:out(0))
 
 synth:num_slots(128)
 synth:min_length(0.1)
@@ -17,5 +17,5 @@ synth:max_offset(1.0)
 synth:min_multiplier(0.25)
 synth:max_multiplier(8.0)
 
-port:select 'left'
-port:select 'right'
+p:select 'left'
+p:select 'right'

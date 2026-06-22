@@ -232,16 +232,14 @@ void api_define_filter(lua_State *state)
   };
 
   const luaL_Reg filters[] = {
-    { "init", api_create_filter, },
+    { "filter", api_create_filter, },
     { NULL,     NULL, },
   };
 
-  lua_newtable(state);
   for (const luaL_Reg *reg = filters; reg->name; reg++) {
     lua_pushcfunction(state, reg->func);
-    lua_setfield(state, -2, reg->name);
+    lua_setglobal(state, reg->name);
   }
-  lua_setglobal(state, "Filter");
 
   luaL_newmetatable(state, s_filter_mt);
   lua_newtable(state);

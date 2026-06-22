@@ -1,7 +1,7 @@
 local M = {}
 M.__index = M
 
-function M.init(callback)
+function event_queue(callback)
   local self = {}
 
   self.queue = {}
@@ -31,5 +31,3 @@ function M:append_list(list)
     self:append(t, arg)
   end
 end
-
-return M
