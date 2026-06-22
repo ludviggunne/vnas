@@ -104,7 +104,7 @@ void api_define_oscil(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "oscil", api_create_oscil, },
+    { "oscil_init", api_create_oscil, },
     { NULL,    NULL, },
   };
 

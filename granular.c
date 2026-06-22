@@ -327,7 +327,7 @@ void api_define_granular(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "granular", api_create_synth, },
+    { "granular_init", api_create_synth, },
     { NULL,    NULL, },
   };
 

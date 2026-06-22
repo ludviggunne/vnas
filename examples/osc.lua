@@ -1,6 +1,6 @@
 require 'lib.osc'
 
-udp(9000, function(raw)
+udp_bind(9000, function(raw)
   local status, msg = pcall(osc_decode, raw)
 
   if not status then

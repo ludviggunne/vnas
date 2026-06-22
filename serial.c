@@ -177,7 +177,7 @@ void api_define_serial_stream(lua_State *state)
 
   const luaL_Reg funcs[] = {
     // { "init", api_create_serial_stream, },
-    { "serial", api_create_serial_stream, },
+    { "serial_open", api_create_serial_stream, },
     { NULL,   NULL, },
   };
 

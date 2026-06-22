@@ -166,8 +166,8 @@ void api_define_sample(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "sample",    api_load_sample, },
-    { NULL,        NULL, },
+    { "sample_load",    api_load_sample, },
+    { NULL,             NULL, },
   };
 
   for (const luaL_Reg *reg = funcs; reg->name; reg++) {

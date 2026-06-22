@@ -1,7 +1,7 @@
 local M = {}
 M.__index = M
 
-function event_queue(callback)
+function event_queue_init(callback)
   local self = {}
 
   self.queue = {}

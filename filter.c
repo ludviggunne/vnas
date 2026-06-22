@@ -232,7 +232,7 @@ void api_define_filter(lua_State *state)
   };
 
   const luaL_Reg filters[] = {
-    { "filter", api_create_filter, },
+    { "filter_init", api_create_filter, },
     { NULL,     NULL, },
   };
 

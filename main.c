@@ -90,16 +90,16 @@ int main(int argc, char **argv)
       script_arg = optarg;
       break;
     case 'a':
-      script_arg = "for _, e in ipairs(Port.Audio.sources()) do print(e) end exit()";
+      script_arg = "for _, e in ipairs(audio_sources()) do print(e) end exit()";
       break;
     case 'A':
-      script_arg = "for _, e in ipairs(Port.Audio.destinations()) do print(e) end exit()";
+      script_arg = "for _, e in ipairs(audio_sinks()) do print(e) end exit()";
       break;
     case 'm':
-      script_arg = "for _, e in ipairs(Port.Midi.sources()) do print(e) end exit()";
+      script_arg = "for _, e in ipairs(midi_sources()) do print(e) end exit()";
       break;
     case 'M':
-      script_arg = "for _, e in ipairs(Port.Midi.destinations()) do print(e) end exit()";
+      script_arg = "for _, e in ipairs(midi_sinks()) do print(e) end exit()";
       break;
     case 'h':
       usage(stdout);
@@ -115,7 +115,7 @@ int main(int argc, char **argv)
   char script_buf[4096];
   if (binds_spec) {
     snprintf(script_buf, sizeof script_buf,
-             "print(Plugin.bindings('%s')); exit()",
+             "print(plugin_bindings('%s')); exit()",
              binds_spec);
     script_arg = script_buf;
   }

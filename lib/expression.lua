@@ -3,17 +3,17 @@
 local M = {}
 M.__index = M
 
-function input(idx, offset)
+function expr_input(idx, offset)
   return setmetatable({{ 'input', idx, offset or nil }}, M)
 end
 
-function const(value)
+function expr_const(value)
   return setmetatable({{ 'const', value, nil }}, M)
 end
 
 local function toM(value)
   if type(value) == 'number' then
-    value = const(value)
+    value = expr_const(value)
   end
   return value
 end

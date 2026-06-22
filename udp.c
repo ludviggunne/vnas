@@ -82,8 +82,8 @@ void api_define_udp_socket(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "udp", api_create_udp_socket, },
-    { NULL,   NULL, },
+    { "udp_bind", api_create_udp_socket, },
+    { NULL,       NULL, },
   };
 
   for (const luaL_Reg *reg = funcs; reg->name; reg++) {

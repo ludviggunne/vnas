@@ -1,8 +1,8 @@
 function init_port(path, name)
-  local samp = sample(path)
+  local samp = sample_load(path)
   samp:downmix()
 
-  local pb = playback(samp)
+  local pb = playback_init(samp)
   pb:play()
   pb:loop()
 

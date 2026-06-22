@@ -113,7 +113,7 @@ void api_define_playback(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "playback", api_create_playback, },
+    { "playback_init", api_create_playback, },
     { NULL,       NULL, },
   };
 

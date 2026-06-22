@@ -342,9 +342,9 @@ void api_define_plugin(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "plugin",     api_load_plugin, },
-    { "bindings",   api_genbinds, },
-    { NULL,         NULL, },
+    { "plugin_load",     api_load_plugin, },
+    { "plugin_bindings", api_genbinds, },
+    { NULL,              NULL, },
   };
 
   for (const luaL_Reg *reg = funcs; reg->name; reg++) {
@@ -379,6 +379,17 @@ static void write_buf(char **buf, const char *fmt, ...)
   (*buf)[new_len] = '\0';
 }
 
+static const char *snake_case(const char *str, char *buf, size_t size)
+{
+    strncpy(buf, str, size);
+    for (char *c = buf; *c; c++) {
+      *c = tolower(*c);
+      if (!isalnum(*c))
+        *c = '_';
+    }
+    return buf;
+}
+
 char *plugin_genbinds(const char *spec, char *error, size_t error_size)
 {
   char *buf = NULL;
@@ -397,6 +408,8 @@ char *plugin_genbinds(const char *spec, char *error, size_t error_size)
     snprintf(ptr, size, ", out_%d", i);
   }
 
+  char snake[1024];
+
   write_buf(&buf, "-- Plugin:         %s\n", descriptor->Name);
   write_buf(&buf, "-- Label:          %s\n", descriptor->Label);
   write_buf(&buf, "-- Maker:          %s\n", descriptor->Maker);
@@ -407,8 +420,8 @@ char *plugin_genbinds(const char *spec, char *error, size_t error_size)
   write_buf(&buf, "M.__index = M\n");
   write_buf(&buf, "\n");
 
-  write_buf(&buf, "function M.load(inputs)\n");
-  write_buf(&buf, "  local plugin%s = Plugin.load('%s', inputs)\n", vars, spec);
+  write_buf(&buf, "function load_%s(inputs)\n", snake_case(descriptor->Name, snake, sizeof snake));
+  write_buf(&buf, "  local plugin%s = plugin_load('%s', inputs)\n", vars, spec);
   write_buf(&buf, "  return setmetatable({ plugin = plugin }, M)%s\n", vars);
   write_buf(&buf, "end\n");
 
@@ -418,24 +431,13 @@ char *plugin_genbinds(const char *spec, char *error, size_t error_size)
 
   int i = -1;
   while ((i = next_port(descriptor, i, LADSPA_PORT_CONTROL|LADSPA_PORT_INPUT)) != -1) {
-    char name[1024];
-    strcpy(name, descriptor->PortNames[i]);
-
-    for (char *c = name; *c; c++) {
-      *c = tolower(*c);
-      if (!isalnum(*c))
-        *c = '_';
-    }
-
+    const char *name = snake_case(descriptor->PortNames[i], snake, sizeof snake);
     write_buf(&buf, "\n");
     write_buf(&buf, "-- %s\n", descriptor->PortNames[i]);
     write_buf(&buf, "function M:%s(value) self.plugin:cntl(%d, value) end\n", name, i);
     write_buf(&buf, "function M.min_%s() return %.2f end\n", name, descriptor->PortRangeHints[i].LowerBound);
     write_buf(&buf, "function M.max_%s() return %.2f end\n", name, descriptor->PortRangeHints[i].UpperBound);
   }
-
-  write_buf(&buf, "\n");
-  write_buf(&buf, "return M\n");
 
   return buf;
 }

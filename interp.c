@@ -93,7 +93,7 @@ void api_define_interp(lua_State *state)
   };
 
   const luaL_Reg funcs[] = {
-    { "interp", api_create_interp, },
+    { "interp_init", api_create_interp, },
     { NULL,    NULL, },
   };
 

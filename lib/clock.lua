@@ -1,7 +1,7 @@
 local M = {}
 M.__index = M
 
-function clock(bpm, callback)
+function clock_init(bpm, callback)
   local self = {
     user_cb = callback,
     interval = 60.0 / bpm,

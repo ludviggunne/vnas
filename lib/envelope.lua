@@ -1,9 +1,9 @@
 local M = {}
 M.__index = M
 
-function envelope(attack, decay, sustain, release)
+function env_init(attack, decay, sustain, release)
   return setmetatable({
-    interp = interp(0),
+    interp = interp_init(0),
     _attack = attack,
     _decay = decay,
     _sustain = sustain,
