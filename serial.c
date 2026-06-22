@@ -125,13 +125,16 @@ static void io_handler_cobs(int fd, void *data)
   push_main_thread_event(s->cb, push_arg, s->buf, s->size);
 }
 
-static void stream_setup(lua_State *state, int fd, int baud);
+static void stream_setup(lua_State *state, int fd, int baud, int size, const char *parity, int stop);
 
 static int api_create_serial_stream(lua_State *state)
 {
-  const char *path = luaL_checkstring(state, 1);
-  int baud = luaL_checkinteger(state, 2);
-  const char *encoding = luaL_checkstring(state, 3);
+  const char *path = luaL_checkstring(state,1);
+  int baud = luaL_checkinteger(state,2);
+  int size = luaL_checkinteger(state,3);
+  const char *parity = luaL_checkstring(state,4);
+  int stop = luaL_checkinteger(state,5);
+  const char *encoding = luaL_checkstring(state,6);
 
   io_handler_t io_handler;
   if (strcmp(encoding,"cobs") == 0) {
@@ -142,8 +145,8 @@ static int api_create_serial_stream(lua_State *state)
     luaL_error(state, "invalid encoding: %s", encoding);
   }
 
-  luaL_checktype(state, 4, LUA_TFUNCTION);
-  lua_pushvalue(state, 4);
+  luaL_checktype(state, 7, LUA_TFUNCTION);
+  lua_pushvalue(state, 7);
   int cb = luaL_ref(state, LUA_REGISTRYINDEX);
 
   struct serial_stream *s = lua_newuserdata(state, sizeof *s);
@@ -162,7 +165,7 @@ static int api_create_serial_stream(lua_State *state)
     luaL_error(state, "failed to open %s: %s", path, err);
   }
 
-  stream_setup(state, s->fd, baud);
+  stream_setup(state,s->fd,baud,size,parity,stop);
 
   io_add_input(s->fd, s, io_handler);
 
@@ -196,7 +199,7 @@ void api_define_serial_stream(lua_State *state)
   lua_pop(state, 1);
 }
 
-static void stream_setup(lua_State *state, int fd, int baud)
+static void stream_setup(lua_State *state, int fd, int baud, int size, const char *parity, int stop)
 {
   int bflag;
 
@@ -356,9 +359,12 @@ static void stream_setup(lua_State *state, int fd, int baud)
     break;
   }
 
-  if (bflag < 0) {
+  if (bflag < 0)
     luaL_error(state, "unsupported baud rate: %d", baud);
-  }
+
+  /* TODO: frame format */
+  if (size != 8 || strcmp(parity,"N") != 0 || stop != 1)
+    luaL_error(state, "only currently supported frame format is 8N1");
 
   struct termios tty;
   memset(&tty, 0, sizeof tty);

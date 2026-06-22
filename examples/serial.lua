@@ -1,6 +1,7 @@
-serial_open(
-  '/dev/ttyACM0', -- Path
-  9600,           -- Baud rate
-  'cstr',         -- Protocol (cstr = null terminated string)
-  log.info        -- Message callback
-)
+serial_open2 {
+  path = '/dev/ttyACM0',
+  baud = 9600,
+  format = '8N1',
+  encoding = 'cstr',
+  handler = log.info,
+}
